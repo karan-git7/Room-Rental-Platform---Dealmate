@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import api, { API_BASE_URL } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 
 const LogoContext = createContext();
 
@@ -12,15 +12,7 @@ export function LogoProvider({ children }) {
     try {
       const { data } = await api.get("/admin/settings/logo");
       if (data?.logo) {
-         let src = data.logo;
-         // If it starts with /uploads, it's relative to backend root
-         if (src.startsWith("/uploads")) {
-             // API_BASE_URL is http://localhost:5000/api
-             // We need http://localhost:5000
-             const baseUrl = API_BASE_URL.replace("/api", "");
-             src = `${baseUrl}${src}`;
-         }
-         setLogo(src);
+         setLogo(getPublicImageUrl(data.logo, 'product'));
       } else {
           setLogo(DEFAULT_LOGO);
       }

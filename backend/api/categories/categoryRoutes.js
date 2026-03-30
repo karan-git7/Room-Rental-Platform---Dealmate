@@ -30,7 +30,10 @@ router.post(
       const { name } = req.body;
       if (!name) return res.status(400).json({ message: "Name is required" });
       let imagePath = req.body.image || "";
-      if (req.file) imagePath = `/${req.file.path.replace(/\\\\/g, "/").replace(/\\/g, "/")}`;
+      if (req.file) {
+        const filePath = req.file.path.replace(/\\\\/g, "/").replace(/\\/g, "/");
+        imagePath = filePath.startsWith("http") ? filePath : `/${filePath}`;
+      }
       const cat = await Category.create({ name: name.trim(), image: imagePath });
       res.status(201).json(cat);
     } catch (err) {
@@ -61,7 +64,8 @@ router.put("/:id", protect, adminOnly, productUpload.single("image"), async (req
     if (name) cat.name = name.trim();
     if (req.body.order !== undefined) cat.order = Number(req.body.order);
     if (req.file) {
-      cat.image = `/${req.file.path.replace(/\\\\/g, "/").replace(/\\/g, "/")}`;
+      const filePath = req.file.path.replace(/\\\\/g, "/").replace(/\\/g, "/");
+      cat.image = filePath.startsWith("http") ? filePath : `/${filePath}`;
     } else if (req.body.image) {
       cat.image = req.body.image;
     }

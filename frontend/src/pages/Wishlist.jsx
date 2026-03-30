@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { API_ORIGIN } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 import "../styles/wishlist.css";
 import { MapPin } from "lucide-react";
 
@@ -23,10 +23,7 @@ const Wishlist = () => {
     fetchWishlist();
   }, []);
 
-  const imageUrl = (src) => {
-    if (!src) return "https://via.placeholder.com/300x200?text=No+Image";
-    return src.startsWith("/") ? `${API_ORIGIN}${src}` : src;
-  };
+  const imageUrl = (src) => getPublicImageUrl(src, 'product');
 
   if (loading) return (
     <div className="wishlist-container">

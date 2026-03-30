@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api, { API_ORIGIN } from "../../utils/api";
+import api, { getPublicImageUrl } from "../../utils/api";
 import { Search, MoreVertical, Edit, Trash2, RefreshCw, Calendar, Eye, CheckCircle, XCircle, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BoostedInventory from "./BoostedInventory";
@@ -305,7 +305,7 @@ export default function InventoryTracker() {
                                     <td>
                                         <div className="product-info">
                                             <img
-                                                src={p.images && p.images[0] ? (p.images[0].startsWith('http') ? p.images[0] : `${API_ORIGIN}${p.images[0]}`) : "/placeholder.jpg"}
+                                                src={getPublicImageUrl(p.images && p.images[0] ? p.images[0] : p.image, 'product')}
                                                 alt={p.name}
                                                 style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }}
                                             />

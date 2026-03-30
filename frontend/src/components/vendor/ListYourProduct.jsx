@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import LocationMapModal from "../common/LocationMapModal";
 import axios from "axios";
-import api, { API_BASE_URL, API_ORIGIN } from "../../utils/api";
+import api, { API_BASE_URL, getPublicImageUrl } from "../../utils/api";
 import PaymentModal from "./PaymentModal";
 import "./ListYourProduct.css";
 
@@ -651,7 +651,7 @@ const ListYourProduct = ({ initialData, isEmbedded = false }) => {
           {formData.images.map((img, index) => (
             <div key={index} className={`image-card ${index === 0 ? 'cover-image' : ''}`}>
               <img
-                src={(img.startsWith('http') || img.startsWith('blob:')) ? img : `${API_ORIGIN}${img}`}
+                src={getPublicImageUrl(img, 'product')}
                 alt={`Product ${index}`}
               />
               {index === 0 && <div className="cover-badge">Cover</div>}
@@ -948,7 +948,7 @@ const ListYourProduct = ({ initialData, isEmbedded = false }) => {
         <div className="preview-image">
           {formData.images.length > 0 ? (
             <img
-              src={formData.images[0].startsWith('http') ? formData.images[0] : `${API_ORIGIN}${formData.images[0]}`}
+              src={getPublicImageUrl(formData.images[0], 'product')}
               alt="Preview"
             />
           ) : (

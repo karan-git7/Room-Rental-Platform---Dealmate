@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api, { API_ORIGIN } from "../../utils/api";
+import api, { getPublicImageUrl } from "../../utils/api";
 import { CheckCircle, XCircle, Eye, X } from "lucide-react";
 
 export default function SellerApproval() {
@@ -55,30 +55,7 @@ export default function SellerApproval() {
   }, []);
 
   // Helper to construct image URL
-  const getImageUrl = (path) => {
-    if (!path) return null;
-    // If path is absolute or has backslashes, try to normalize
-    // Assuming backend serves 'uploads' folder at /uploads
-    // and path stored might be 'uploads\seller-kyc\...' or just 'seller-kyc\...'
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-    }
-    // Simple heuristic: keep part after 'uploads' or just use as is if relative
-    const normalizedPath = path.replace(/\\/g, '/');
-    const uploadsIndex = normalizedPath.indexOf('uploads/');
-    
-    let relativePath = normalizedPath;
-    if (uploadsIndex !== -1) {
-        relativePath = normalizedPath.substring(uploadsIndex); // e.g. uploads/seller-kyc/file.png
-    } else {
-        // If path doesn't start with uploads, maybe prepend it? 
-        // Or it might be an absolute path we can't easily serve without mapping.
-        // Let's assume standard structure for now.
-    }
-    
-    return `${API_ORIGIN}/${relativePath}`;
-    // In production, API_ORIGIN reads from REACT_APP_API_URL env var
-  };
+  const getImageUrl = (path) => getPublicImageUrl(path, 'kyc');
 
   return (
     <div>

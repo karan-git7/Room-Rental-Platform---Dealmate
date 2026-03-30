@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/home.css";
-import api, { API_ORIGIN } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 import { getDrivingRoute } from "../utils/routingService";
 import { fetchUserRecommendations, fetchTrendingProducts } from "../utils/recommendations";
 import { Heart, ShieldCheck, CheckCircle, AlertCircle, X, ChevronLeft, ChevronRight, Zap } from "lucide-react";
@@ -312,10 +312,7 @@ const Home = () => {
     return `${d}d ago`;
   }
 
-  const imageUrl = (src) => {
-    if (!src) return "https://via.placeholder.com/200x150?text=No+Image";
-    return src.startsWith("/") ? `${API_ORIGIN}${src}` : src;
-  };
+  const imageUrl = (src) => getPublicImageUrl(src, 'product');
 
   async function toggleSave(id) {
     const isSaved = savedSet.has(id);

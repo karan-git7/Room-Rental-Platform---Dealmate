@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Pencil, Eye, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, Clock } from 'lucide-react';
-import api, { API_ORIGIN } from '../../utils/api';
+import api, { getPublicImageUrl } from '../../utils/api';
 import ListYourProduct from '../vendor/ListYourProduct';
 
 const ProductList = () => {
@@ -58,11 +58,7 @@ const ProductList = () => {
     .map(p => p.subCategory)
     .filter(Boolean))];
 
-  const getImageSrc = (img) => {
-    if (!img) return "/placeholder.jpg";
-    if (img.startsWith("http")) return img;
-    return `${API_ORIGIN}${img}`;
-  };
+  const getImageSrc = (img) => getPublicImageUrl(img, 'product');
 
   const getStatusBadge = (status) => {
     const styles = {

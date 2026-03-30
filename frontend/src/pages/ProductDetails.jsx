@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api, { API_ORIGIN } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 import "../styles/productDetails.css";
 import "../styles/home.css";
 import { Heart, MessageCircle, Share2, Flag, X, Star, CheckCircle, AlertCircle, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
@@ -211,10 +211,7 @@ const ProductDetails = () => {
 
   if (!product) return <div className="container py-4">Product not found</div>;
 
-  const imageUrl = (src) => {
-    if (!src) return "https://via.placeholder.com/600x400?text=No+Image";
-    return src.startsWith("/") ? `${API_ORIGIN}${src}` : src;
-  };
+  const imageUrl = (src) => getPublicImageUrl(src, 'product');
 
   const images = product.images?.length > 0 ? product.images : [product.image];
   const stockCount = parseInt(product.stock ?? product.countInStock ?? 0, 10) || 0;

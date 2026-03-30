@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api, { API_ORIGIN } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 import "../styles/sellerProfile.css";
 import { X, Edit2, Trash2, CheckCircle, AlertCircle } from "lucide-react";
 
@@ -64,9 +64,7 @@ export default function SellerProfile() {
   }, [id]);
 
   function imageUrl(p) {
-    if (!p) return "";
-    const s = String(p).replace(/\\/g, "/");
-    return s.startsWith("/") ? `${API_ORIGIN}${s}` : s;
+    return getPublicImageUrl(p, 'product');
   }
 
   const handleReportSubmit = async (e) => {

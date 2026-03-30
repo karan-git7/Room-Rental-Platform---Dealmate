@@ -55,3 +55,31 @@ api.interceptors.response.use(
 
 export default api;
 export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, "");
+
+/**
+ * Robust helper to resolve image URLs for both local and production (Cloudinary).
+ * @param {string} src - The image source from the database.
+ * @param {string} type - 'product', 'avatar', 'category', 'kyc' for specialized placeholders.
+ * @returns {string} - The corrected absolute URL.
+ */
+export const getPublicImageUrl = (path, type = 'product') => {
+  const getPlaceholder = (t) => {
+    if (t === 'avatar') return 'https://ui-avatars.com/api/?name=User&background=random';
+    if (t === 'category') return '/placeholder.jpg';
+    return 'https://via.placeholder.com/600x400?text=No+Image';
+  };
+
+  if (!path) return getPlaceholder(type);
+  
+  let s = String(path).replace(/\\/g, "/");
+
+  // Defensive: Strip leading slashes from absolute URLs (e.g., "/https://...")
+  if (s.startsWith("/") && (s.includes("://") || s.includes("res.cloudinary.com"))) {
+    s = s.replace(/^\/+/, "");
+  }
+
+  if (s.startsWith("http")) return s;
+  
+  const normalized = s.startsWith("/") ? s : `/${s}`;
+  return `${API_ORIGIN}${normalized}`;
+};

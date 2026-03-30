@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { API_ORIGIN } from "../../utils/api";
+import api, { getPublicImageUrl } from "../../utils/api";
 import { Search, Pencil, Eye, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown, Clock } from "lucide-react";
 import BoostModal from "./BoostModal";
 
@@ -76,11 +76,7 @@ export default function ProductUpload({
         .map(p => p.subCategory)
         .filter(Boolean))];
 
-    const getImageSrc = (img) => {
-        if (!img) return "/placeholder.jpg";
-        if (img.startsWith("http")) return img;
-        return `${API_ORIGIN}${img}`;
-    };
+    const getImageSrc = (img) => getPublicImageUrl(img, 'product');
 
     const getStatusBadge = (status) => {
         const styles = {

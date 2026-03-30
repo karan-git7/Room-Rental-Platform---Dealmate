@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams, useParams } from "react-router-dom";
-import api, { API_ORIGIN } from "../utils/api";
+import api, { getPublicImageUrl } from "../utils/api";
 import "../styles/browse.css";
 import { Heart } from "lucide-react";
 import Breadcrumbs from "../components/common/Breadcrumbs";
@@ -478,10 +478,7 @@ export default function Browse() {
     });
   };
 
-  const imageUrl = (src) => {
-    if (!src) return "https://via.placeholder.com/200x150?text=No+Image";
-    return src.startsWith("/") ? `${API_ORIGIN}${src}` : src;
-  };
+  const imageUrl = (src) => getPublicImageUrl(src, 'product');
 
   function timeAgo(dateStr) {
     if (!dateStr) return "";

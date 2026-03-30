@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api, { API_ORIGIN } from "../../utils/api";
+import api, { getPublicImageUrl } from "../../utils/api";
 import { Pencil, Trash2 } from "lucide-react";
 
 export default function CategoryList({ onAdd = () => {} }) {
@@ -39,12 +39,7 @@ export default function CategoryList({ onAdd = () => {} }) {
   const startIndex = (page - 1) * pageSize;
   const visible = categories.slice(startIndex, startIndex + pageSize);
 
-  const resolveImageSrc = (img) => {
-    if (!img) return "";
-    if (img.startsWith("/")) return `${API_ORIGIN}${img}`;
-    if (img.startsWith("http")) return img;
-    return `${API_ORIGIN}/${img}`;
-  };
+  const resolveImageSrc = (img) => getPublicImageUrl(img, 'category');
 
   const handleDelete = async (id) => {
     try {
@@ -61,8 +56,7 @@ export default function CategoryList({ onAdd = () => {} }) {
   const beginEdit = (cat) => {
     setEditingCat(cat);
     setEditName(cat.name || "");
-    const src = resolveImageSrc(cat.image || "");
-    setEditPreview(src);
+    setEditPreview(resolveImageSrc(cat.image || cat.imageUrl || cat.icon || ""));
     setEditFile(null);
   };
 
@@ -84,16 +78,27 @@ export default function CategoryList({ onAdd = () => {} }) {
     const id = editingCat._id || editingCat.id;
     try {
       const fd = new FormData();
-      if (editName) fd.append("name", editName);
-      if (editFile) fd.append("image", editFile);
+      if (editName) fd.append("name", editName.trim());
+      
+      if (editFile) {
+          fd.append("image", editFile);
+      } else if (editingCat.image || editingCat.imageUrl || editingCat.icon) {
+          fd.append("image", editingCat.image || editingCat.imageUrl || editingCat.icon);
+      }
+
       await api.put(`/admin/categories/${id}`, fd, {
         headers: { "Content-Type": "multipart/form-data" }
       });
     } catch (e1) {
       try {
         const fd = new FormData();
-        if (editName) fd.append("name", editName);
-        if (editFile) fd.append("image", editFile);
+        if (editName) fd.append("name", editName.trim());
+        if (editFile) {
+            fd.append("image", editFile);
+        } else if (editingCat.image || editingCat.imageUrl || editingCat.icon) {
+            fd.append("image", editingCat.image || editingCat.imageUrl || editingCat.icon);
+        }
+
         await api.put(`/categories/${id}`, fd, {
           headers: { "Content-Type": "multipart/form-data" }
         });

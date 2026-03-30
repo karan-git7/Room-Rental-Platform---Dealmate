@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import api, { API_ORIGIN } from "../../utils/api";
+import api, { API_ORIGIN, getPublicImageUrl } from "../../utils/api";
 import { categoryConfig } from "../../config/categories";
 import { Plus, Trash2, Edit2, Save, X, Upload, CheckCircle, ChevronRight, Layout, Info, AlertCircle } from "lucide-react";
 import "./CategoryManagement.css";
@@ -20,6 +20,7 @@ export default function CategoryManagement() {
     const [editingCategory, setEditingCategory] = useState(null);
     const [editName, setEditName] = useState("");
     const [editFile, setEditFile] = useState(null);
+    const [editPreview, setEditPreview] = useState(null);
     const fileInputRef = useRef(null);
     const [editingSubId, setEditingSubId] = useState(null);
     const [editSubName, setEditSubName] = useState("");
@@ -90,6 +91,7 @@ export default function CategoryManagement() {
         const f = e.target.files?.[0];
         if (f) {
             setEditFile(f);
+            setEditPreview(URL.createObjectURL(f));
         }
     };
 
@@ -113,17 +115,27 @@ export default function CategoryManagement() {
         try {
             const fd = new FormData();
             fd.append("name", editName.trim());
-            if (editFile) fd.append("image", editFile);
+            
+            // Find the original category to get its current image
+            const originalCat = categories.find(c => c._id === id);
+            
+            if (editFile) {
+                fd.append("image", editFile);
+            } else if (originalCat && originalCat.image) {
+                fd.append("image", originalCat.image);
+            }
 
             await api.put(`/categories/${id}`, fd, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
 
-            showToast("Category updated");
+            showToast("Category updated successfully");
             setEditingCategory(null);
+            setEditPreview(null);
+            setEditFile(null);
             fetchCategories();
         } catch (err) {
-            showToast("Update failed", "error");
+            showToast("Update failed: " + (err.response?.data?.message || err.message), "error");
         }
     };
 
@@ -293,11 +305,7 @@ export default function CategoryManagement() {
         }
     };
 
-    const getFullImageUrl = (path) => {
-        if (!path) return "";
-        if (path.startsWith("http")) return path;
-        return `${API_ORIGIN}${path}`;
-    };
+    const getFullImageUrl = (path) => getPublicImageUrl(path, 'category');
 
     if (loading) return <div className="loading-overlay"><span>Loading Catalog...</span></div>;
 
@@ -352,7 +360,9 @@ export default function CategoryManagement() {
                                 onClick={() => { setSelectedCategory(cat); fetchSubcategories(cat._id); }}
                             >
                                 <div className="cat-card-thumb">
-                                    {cat.image ? (
+                                    {editPreview && editingCategory === cat._id ? (
+                                        <img src={editPreview} alt="Preview" />
+                                    ) : cat.image ? (
                                         <img src={getFullImageUrl(cat.image)} alt={cat.name} />
                                     ) : (
                                         <Layout size={16} color="#94a3b8" />
