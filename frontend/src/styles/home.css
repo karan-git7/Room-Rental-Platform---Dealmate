@@ -1060,3 +1060,187 @@
 .load-more-container {
   margin-bottom: 18px;
 }
+
+/* ==================== DEMO ACCESS POPUP ==================== */
+
+.demo-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.demo-popup-content {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: slideUp 0.4s ease-out;
+}
+
+.demo-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+}
+
+.demo-popup-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: rotate(90deg);
+}
+
+.demo-popup-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.demo-popup-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.demo-popup-header p {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.demo-popup-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.demo-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-option-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.demo-option-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.demo-option-btn.guest {
+  border-color: #6c757d;
+}
+
+.demo-option-btn.guest:hover {
+  border-color: #6c757d;
+  background: #f8f9fa;
+}
+
+.demo-option-btn.admin {
+  border-color: #dc3545;
+}
+
+.demo-option-btn.admin:hover {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.demo-option-btn.seller {
+  border-color: #28a745;
+}
+
+.demo-option-btn.seller:hover {
+  border-color: #28a745;
+  background: #f0fff4;
+}
+
+.demo-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.demo-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.demo-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.demo-popup-footer {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.demo-popup-footer p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

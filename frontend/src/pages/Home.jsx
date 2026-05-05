@@ -20,6 +20,8 @@ const Home = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [exactDistances, setExactDistances] = useState({});
   const [visibleProductsCount, setVisibleProductsCount] = useState(16);
+  const [showDemoPopup, setShowDemoPopup] = useState(true);
+  const [demoLoading, setDemoLoading] = useState(false);
   const trendingRef = useRef(null);
   const recsRef = useRef(null);
 
@@ -287,6 +289,66 @@ const Home = () => {
     setToast({ show: true, message, type });
   };
 
+  const handleGuestLogin = async () => {
+    try {
+      setDemoLoading(true);
+      const { data } = await api.post('/auth/guest');
+      
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setShowDemoPopup(false);
+      navigate('/');
+    } catch (err) {
+      console.error('Guest login error:', err);
+      showToast('Guest login failed', 'error');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  const handleViewAdminLogin = async () => {
+    try {
+      setDemoLoading(true);
+      const { data } = await api.post('/auth/login', { 
+        email: 'viewadmin@dealmate.com', 
+        password: 'viewadmin123' 
+      });
+
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+      setShowDemoPopup(false);
+      navigate('/admin');
+    } catch (err) {
+      console.error('View admin login error:', err);
+      showToast('View admin login failed', 'error');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  const handleViewSellerLogin = async () => {
+    try {
+      setDemoLoading(true);
+      const { data } = await api.post('/auth/login', { 
+        email: 'kgusa121@gmail.com', 
+        password: '123123' 
+      });
+
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+      setShowDemoPopup(false);
+      navigate('/seller');
+    } catch (err) {
+      console.error('View seller login error:', err);
+      showToast('View seller login failed', 'error');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
   const scrollTrending = (dir) => {
     if (trendingRef.current) {
       const scrollAmt = 252;
@@ -447,6 +509,74 @@ const Home = () => {
           </button>
         </div>
       )}
+      
+      {/* Demo Access Popup */}
+      {showDemoPopup && (
+        <div 
+          className="demo-popup-overlay"
+          onClick={() => setShowDemoPopup(false)}
+        >
+          <div 
+            className="demo-popup-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className="demo-popup-close"
+              onClick={() => setShowDemoPopup(false)}
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="demo-popup-header">
+              <h3>🚀 Quick Demo Access</h3>
+              <p>Try the platform with demo accounts - no signup required!</p>
+            </div>
+            
+            <div className="demo-popup-options">
+              <button
+                className="demo-option-btn guest"
+                onClick={handleGuestLogin}
+                disabled={demoLoading}
+              >
+                <span className="demo-icon">🏠</span>
+                <div className="demo-option-text">
+                  <span className="demo-title">Continue as Guest</span>
+                  <span className="demo-desc">Browse products & test chat (local storage only)</span>
+                </div>
+              </button>
+              
+              <button
+                className="demo-option-btn admin"
+                onClick={handleViewAdminLogin}
+                disabled={demoLoading}
+              >
+                <span className="demo-icon">👑</span>
+                <div className="demo-option-text">
+                  <span className="demo-title">View Admin Dashboard</span>
+                  <span className="demo-desc">View-only access to admin panel</span>
+                </div>
+              </button>
+              
+              <button
+                className="demo-option-btn seller"
+                onClick={handleViewSellerLogin}
+                disabled={demoLoading}
+              >
+                <span className="demo-icon">🛍️</span>
+                <div className="demo-option-text">
+                  <span className="demo-title">View Seller Dashboard</span>
+                  <span className="demo-desc">Add products, view analytics (add-only)</span>
+                </div>
+              </button>
+            </div>
+            
+            <div className="demo-popup-footer">
+              <p>💡 Click outside or press X to close this popup</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <section className="hm-cat-strip">
         <div className="hm-container">
           <div className="hm-cats">
