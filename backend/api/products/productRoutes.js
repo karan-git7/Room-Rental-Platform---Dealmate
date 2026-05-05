@@ -15,23 +15,23 @@ import {
   boostProduct,
   getBoostedProducts,
 } from './productController.js';
-import { protect, adminOnly, sellerOnly, optionalAuth } from '../../middleware/auth.js';
+import { protect, adminOnly, sellerOnly, optionalAuth, viewOnlySeller, blockViewOnly, allowAddOnly } from '../../middleware/auth.js';
 import upload, { conditionalUploadSingle } from "../../middleware/upload.js";
 
 const router = express.Router();
 
 router.route('/')
   .get(getProducts)
-  .post(protect, conditionalUploadSingle("image"), createProduct);
+  .post(protect, viewOnlySeller, allowAddOnly, blockViewOnly, conditionalUploadSingle("image"), createProduct);
 
 router.route('/:id')
   .get(getProductById)
-  .put(protect, updateProduct)
-  .delete(protect, deleteProduct);
+  .put(protect, viewOnlySeller, allowAddOnly, blockViewOnly, updateProduct)
+  .delete(protect, viewOnlySeller, allowAddOnly, blockViewOnly, deleteProduct);
 
 // Similar products
 router.get('/:id/similar', getSimilarProducts);
-router.post('/:id/boost', protect, sellerOnly, boostProduct);
+router.post('/:id/boost', protect, viewOnlySeller, allowAddOnly, blockViewOnly, boostProduct);
 router.get('/boosted/list', getBoostedProducts);
 
 // View tracking (public, but checks if user is seller using optional auth)

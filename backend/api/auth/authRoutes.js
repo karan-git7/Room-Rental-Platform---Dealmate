@@ -1,5 +1,6 @@
 // backend/api/auth/authRoutes.js
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { register, login, googleLogin } from './authController.js';
 import { verifyOtp, resendOtp, verifyEmailToken } from './otpController.js';
 import { requestPasswordReset, resetPassword } from './passwordReset.js';
@@ -27,6 +28,34 @@ router.post('/reset', resetPassword);                // POST /api/auth/reset
 // protected example
 router.get('/me', authMiddleware, (req, res) => {
   res.json({ user: req.user });
+});
+
+// guest login
+router.post('/guest', (req, res) => {
+  // Generate a guest session ID
+  const guestId = 'guest_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  
+  const guestUser = {
+    _id: guestId,
+    name: 'Guest User',
+    email: guestId + '@guest.local',
+    role: 'guest',
+    isGuest: true,
+    isVerified: true
+  };
+
+  // Create a simple JWT token for guest (no database storage)
+  const token = jwt.sign(
+    { id: guestId, email: guestUser.email, role: 'guest', isGuest: true },
+    process.env.JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  res.json({
+    message: "Guest login successful",
+    token,
+    user: guestUser
+  });
 });
 
 export default router;

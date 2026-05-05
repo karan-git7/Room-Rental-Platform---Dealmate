@@ -581,6 +581,48 @@ const ProductDetails = () => {
                   showToast("Please login to chat with the seller", "error");
                   return;
                 }
+                
+                if (user.isGuest) {
+                  // For guest users, create a simulated seller conversation in local storage
+                  const guestConversations = JSON.parse(localStorage.getItem("guestConversations") || "[]");
+                  const sellerConvo = guestConversations.find(c => c.title?.includes(product.seller?.name));
+                  
+                  if (sellerConvo) {
+                    navigate(`/chat/${sellerConvo._id}`);
+                    return;
+                  }
+                  
+                  // Create new conversation with seller
+                  const newConvo = {
+                    _id: `guest_convo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    title: `${product.seller?.name} - Guest Chat`,
+                    participants: [
+                      { _id: user._id, name: user.name },
+                      { _id: 'guest_seller', name: product.seller?.name || 'Seller' }
+                    ],
+                    lastMessage: {
+                      _id: `guest_msg_${Date.now()}`,
+                      text: `Hello! I'm interested in your product: ${product.name}`,
+                      sender: { _id: 'guest_seller', name: product.seller?.name || 'Seller' },
+                      createdAt: new Date().toISOString(),
+                      read: false
+                    },
+                    product: product._id
+                  };
+                  
+                  guestConversations.push(newConvo);
+                  localStorage.setItem("guestConversations", JSON.stringify(guestConversations));
+                  
+                  // Also create messages for this conversation
+                  const guestMessages = JSON.parse(localStorage.getItem("guestMessages") || "[]");
+                  guestMessages.push(newConvo.lastMessage);
+                  localStorage.setItem("guestMessages", JSON.stringify(guestMessages));
+                  
+                  navigate(`/chat/${newConvo._id}`);
+                  return;
+                }
+                
+                // For logged-in users, use normal chat functionality
                 try {
                   const sellerId = product.seller?._id || product.seller?.id;
                   if (!sellerId) return;
@@ -594,7 +636,7 @@ const ProductDetails = () => {
                 } catch { }
               }}
             >
-              <MessageCircle size={18} /> Chat Now
+              <MessageCircle size={18} /> {user?.isGuest ? "Chat with Seller (Guest)" : "Chat Now"}
             </button>
           </div>
 

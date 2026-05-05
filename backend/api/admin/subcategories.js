@@ -1,6 +1,7 @@
 import express from "express";
 import SubCategory from "../../models/SubCategory.js";
 import { productUpload } from "../../middleware/fileUpload.js";
+import { blockViewOnly } from "../../middleware/auth.js";
 
 export const getSubCategories = async (req, res) => {
   try {
@@ -59,10 +60,10 @@ export const deleteSubCategory = async (req, res) => {
 
 export const adminSubCategoryRouter = express.Router();
 adminSubCategoryRouter.get("/", getSubCategories);
-adminSubCategoryRouter.post("/", productUpload.single("image"), createSubCategory);
-adminSubCategoryRouter.put("/:id", productUpload.single("image"), updateSubCategory);
-adminSubCategoryRouter.delete("/:id", deleteSubCategory);
-adminSubCategoryRouter.post("/bulk", async (req, res) => {
+adminSubCategoryRouter.post("/", productUpload.single("image"), blockViewOnly, createSubCategory);
+adminSubCategoryRouter.put("/:id", productUpload.single("image"), blockViewOnly, updateSubCategory);
+adminSubCategoryRouter.delete("/:id", blockViewOnly, deleteSubCategory);
+adminSubCategoryRouter.post("/bulk", blockViewOnly, async (req, res) => {
   try {
     const { category, names = [] } = req.body;
     if (!category || !Array.isArray(names) || names.length === 0) {

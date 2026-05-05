@@ -31,6 +31,9 @@ export default function Chat() {
   const streamRef = useRef(null);
   const socket = useSocket();
 
+  // Check if user is guest
+  const isGuest = currentUser?.isGuest;
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   };
@@ -70,40 +73,103 @@ export default function Chat() {
   }, [socket, activeId]);
   useEffect(() => {
     let mounted = true;
-    async function loadConversations() {
-      try {
-        const res = await api.get("/chat/conversations");
-        if (!mounted) return;
-        setConversations(res.data || []);
+    
+    if (isGuest) {
+      // For guest users, load conversations from local storage
+      let guestConversations = JSON.parse(localStorage.getItem("guestConversations") || "[]");
+      
+      // Create demo conversation if none exist
+      if (guestConversations.length === 0) {
+        const demoConversation = {
+          _id: 'guest_demo_convo',
+          title: 'Demo Chat - Try It!',
+          participants: [
+            { _id: currentUser._id, name: currentUser.name },
+            { _id: 'demo_seller', name: 'Demo Seller' }
+          ],
+          lastMessage: {
+            _id: 'demo_msg_1',
+            text: 'Welcome to guest chat! Try sending a message - it will be saved locally.',
+            sender: { _id: 'demo_seller', name: 'Demo Seller' },
+            createdAt: new Date().toISOString(),
+            read: false
+          }
+        };
+        
+        guestConversations = [demoConversation];
+        localStorage.setItem("guestConversations", JSON.stringify(guestConversations));
+        
+        // Also create demo message
+        const demoMessages = [{
+          _id: 'demo_msg_1',
+          conversationId: 'guest_demo_convo',
+          text: 'Welcome to guest chat! Try sending a message - it will be saved locally.',
+          sender: { _id: 'demo_seller', name: 'Demo Seller' },
+          createdAt: new Date().toISOString(),
+          read: false
+        }];
+        localStorage.setItem("guestMessages", JSON.stringify(demoMessages));
+      }
+      
+      if (mounted) {
+        setConversations(guestConversations);
         if (routeId) {
           setActiveId(routeId);
-        } else if (res.data?.length && !activeId) {
-          setActiveId(res.data[0]._id);
+        } else if (guestConversations?.length && !activeId) {
+          setActiveId(guestConversations[0]._id);
         }
-      } catch { }
+      }
+    } else {
+      // For regular users, load from API
+      async function loadConversations() {
+        try {
+          const res = await api.get("/chat/conversations");
+          if (!mounted) return;
+          setConversations(res.data || []);
+          if (routeId) {
+            setActiveId(routeId);
+          } else if (res.data?.length && !activeId) {
+            setActiveId(res.data[0]._id);
+          }
+        } catch { }
+      }
+      loadConversations();
     }
-    loadConversations();
+    
     return () => { mounted = false; };
-  }, [routeId]);
+  }, [routeId, isGuest]);
 
   useEffect(() => {
     if (!activeId) return;
     let mounted = true;
-    async function loadMessages() {
-      try {
-        setLoading(true);
-        const res = await api.get(`/chat/conversations/${activeId}/messages`);
-        if (!mounted) return;
-        setMessages(res.data || []);
-      } catch {
-        if (mounted) setMessages([]);
-      } finally {
-        if (mounted) setLoading(false);
+    
+    if (isGuest) {
+      // For guest users, load messages from local storage
+      const guestMessages = JSON.parse(localStorage.getItem("guestMessages") || "[]");
+      const conversationMessages = guestMessages.filter(msg => msg.conversationId === activeId);
+      if (mounted) {
+        setMessages(conversationMessages);
+        setLoading(false);
       }
+    } else {
+      // For regular users, load from API
+      async function loadMessages() {
+        try {
+          setLoading(true);
+          const res = await api.get(`/chat/conversations/${activeId}/messages`);
+          if (!mounted) return;
+          setMessages(res.data || []);
+        } catch {
+          if (mounted) setMessages([]);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      }
+      loadMessages();
     }
-    loadMessages();
+    
     return () => { mounted = false; };
-  }, [activeId]);
+  }, [activeId, isGuest]);
 
   useEffect(() => {
     let mounted = true;
@@ -158,12 +224,49 @@ export default function Chat() {
   async function sendMessage(e) {
     e?.preventDefault();
     if (!text.trim() || !activeId) return;
-    const payload = { conversationId: activeId, text: text.trim() };
-    try {
-      const res = await api.post("/chat/messages", payload);
-      setMessages([...messages, res.data]);
+    
+    if (isGuest) {
+      // For guest users, save message to local storage
+      const newMessage = {
+        _id: `guest_msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        conversationId: activeId,
+        text: text.trim(),
+        sender: {
+          _id: currentUser._id,
+          name: currentUser.name
+        },
+        createdAt: new Date().toISOString(),
+        read: true
+      };
+      
+      // Save to local storage
+      const guestMessages = JSON.parse(localStorage.getItem("guestMessages") || "[]");
+      guestMessages.push(newMessage);
+      localStorage.setItem("guestMessages", JSON.stringify(guestMessages));
+      
+      // Update local state
+      setMessages([...messages, newMessage]);
       setText("");
-    } catch { }
+      
+      // Update conversation last message
+      const guestConversations = JSON.parse(localStorage.getItem("guestConversations") || "[]");
+      const updatedConversations = guestConversations.map(convo => 
+        convo._id === activeId 
+          ? { ...convo, lastMessage: newMessage }
+          : convo
+      );
+      localStorage.setItem("guestConversations", JSON.stringify(updatedConversations));
+      setConversations(updatedConversations);
+      
+    } else {
+      // For regular users, send via API
+      const payload = { conversationId: activeId, text: text.trim() };
+      try {
+        const res = await api.post("/chat/messages", payload);
+        setMessages([...messages, res.data]);
+        setText("");
+      } catch { }
+    }
   }
   async function uploadVoiceBlob(blob) {
     if (!activeId || !blob) return;

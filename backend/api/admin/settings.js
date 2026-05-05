@@ -1,6 +1,6 @@
 import express from "express";
 import { productUpload } from "../../middleware/fileUpload.js";
-import { protect, adminOnly } from "../../middleware/auth.js";
+import { protect, adminOnly, viewOnlyAdmin, blockViewOnly } from "../../middleware/auth.js";
 import Settings from "../../models/Settings.js";
 
 const router = express.Router();
@@ -54,7 +54,7 @@ router.get("/logo", async (req, res) => {
 });
 
 // PUT /api/admin/settings/logo
-router.put("/logo", protect, adminOnly, productUpload.single("logo"), async (req, res) => {
+router.put("/logo", protect, viewOnlyAdmin, blockViewOnly, productUpload.single("logo"), async (req, res) => {
     try {
         const settings = await getOrCreateSettings();
         
@@ -91,7 +91,7 @@ router.get("/footer", async (req, res) => {
 });
 
 // PUT /api/admin/settings/footer
-router.put("/footer", protect, adminOnly, async (req, res) => {
+router.put("/footer", protect, viewOnlyAdmin, blockViewOnly, async (req, res) => {
     try {
         const settings = await getOrCreateSettings();
         const { columns, socials, apps } = req.body;
@@ -122,7 +122,7 @@ router.get("/boost-packages", async (req, res) => {
 });
 
 // PUT /api/admin/settings/boost-packages
-router.put("/boost-packages", protect, adminOnly, async (req, res) => {
+router.put("/boost-packages", protect, viewOnlyAdmin, blockViewOnly, async (req, res) => {
     try {
         const settings = await getOrCreateSettings();
         const { packages } = req.body;

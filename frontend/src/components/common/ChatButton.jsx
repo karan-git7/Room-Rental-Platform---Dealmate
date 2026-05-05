@@ -8,21 +8,32 @@ export default function ChatButton() {
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
   const socket = useSocket();
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
   // Initial fetch of unread count
   useEffect(() => {
     let mounted = true;
-    async function fetchUnread() {
-      try {
-        const res = await api.get("/chat/unread-count");
-        if (mounted) setUnread(res.data?.count || 0);
-      } catch {
-        if (mounted) setUnread(0);
+    
+    // For guest users, get unread count from local storage
+    if (currentUser?.isGuest) {
+      const guestMessages = JSON.parse(localStorage.getItem("guestMessages") || "[]");
+      const unreadCount = guestMessages.filter(msg => !msg.read).length;
+      if (mounted) setUnread(unreadCount);
+    } else {
+      // For regular users, fetch from API
+      async function fetchUnread() {
+        try {
+          const res = await api.get("/chat/unread-count");
+          if (mounted) setUnread(res.data?.count || 0);
+        } catch {
+          if (mounted) setUnread(0);
+        }
       }
+      fetchUnread();
     }
-    fetchUnread();
+    
     return () => { mounted = false; };
-  }, []);
+  }, [currentUser]);
 
   // Listen for real-time unread count updates
   useEffect(() => {

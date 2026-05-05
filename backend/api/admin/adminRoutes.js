@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, adminOnly } from "../../middleware/auth.js";
+import { protect, adminOnly, viewOnlyAdmin, blockViewOnly } from "../../middleware/auth.js";
 import {
   getAllUsers,
   blockOrUnblockUser,
@@ -33,35 +33,35 @@ import settingsRouter from "./settings.js";
 
 const router = express.Router();
 
-// Admin Dashboard Analytics
-router.get("/stats", protect, adminOnly, getAdminStats);
-router.get("/sales-data", protect, adminOnly, getSalesData);
-router.get("/recent-buyers", protect, adminOnly, getRecentBuyers);
-router.get("/recent-orders", protect, adminOnly, getRecentOrders);
-router.get("/boosted-products", protect, adminOnly, getAdminBoostedProducts);
+// Admin Dashboard Analytics (Read-only - all can view)
+router.get("/stats", protect, viewOnlyAdmin, getAdminStats);
+router.get("/sales-data", protect, viewOnlyAdmin, getSalesData);
+router.get("/recent-buyers", protect, viewOnlyAdmin, getRecentBuyers);
+router.get("/recent-orders", protect, viewOnlyAdmin, getRecentOrders);
+router.get("/boosted-products", protect, viewOnlyAdmin, getAdminBoostedProducts);
 
-// User Management
-router.get("/users", protect, adminOnly, getAllUsers);
-router.put("/block/:id", protect, adminOnly, blockOrUnblockUser);
+// User Management (Read-only for view, write for real admin)
+router.get("/users", protect, viewOnlyAdmin, getAllUsers);
+router.put("/block/:id", protect, viewOnlyAdmin, blockViewOnly, blockOrUnblockUser);
 
-// Seller Verification Management
-router.get("/verifications", protect, adminOnly, getVerificationRequests);
-router.put("/verifications/:id/approve", protect, adminOnly, approveVerification);
-router.put("/verifications/:id/reject", protect, adminOnly, rejectVerification);
-router.post("/verifications/request-kyc", protect, adminOnly, requestKycVerification);
+// Seller Verification Management (Read-only for view, write for real admin)
+router.get("/verifications", protect, viewOnlyAdmin, getVerificationRequests);
+router.put("/verifications/:id/approve", protect, viewOnlyAdmin, blockViewOnly, approveVerification);
+router.put("/verifications/:id/reject", protect, viewOnlyAdmin, blockViewOnly, rejectVerification);
+router.post("/verifications/request-kyc", protect, viewOnlyAdmin, blockViewOnly, requestKycVerification);
 
-// Report Management
-router.get("/reports", protect, adminOnly, getPendingReports);
-router.put("/reports/:id/resolve", protect, adminOnly, resolveReport);
+// Report Management (Read-only for view, write for real admin)
+router.get("/reports", protect, viewOnlyAdmin, getPendingReports);
+router.put("/reports/:id/resolve", protect, viewOnlyAdmin, blockViewOnly, resolveReport);
 
-// Support Ticket Management
-router.get("/support", protect, adminOnly, getAllSupportTickets);
-router.put("/support/:id", protect, adminOnly, updateTicketStatus);
-router.delete("/support/:id", protect, adminOnly, deleteTicket);
+// Support Ticket Management (Read-only for view, write for real admin)
+router.get("/support", protect, viewOnlyAdmin, getAllSupportTickets);
+router.put("/support/:id", protect, viewOnlyAdmin, blockViewOnly, updateTicketStatus);
+router.delete("/support/:id", protect, viewOnlyAdmin, blockViewOnly, deleteTicket);
 
-// Categories (Admin)
-router.use("/categories", protect, adminOnly, adminCategoryRouter);
-router.use("/subcategories", protect, adminOnly, adminSubCategoryRouter);
+// Categories (Admin) - Read-only for view, write for real admin
+router.use("/categories", protect, viewOnlyAdmin, adminCategoryRouter);
+router.use("/subcategories", protect, viewOnlyAdmin, adminSubCategoryRouter);
 
 // Settings (Logo, etc.)
 router.use("/settings", settingsRouter);

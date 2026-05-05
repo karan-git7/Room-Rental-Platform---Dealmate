@@ -58,8 +58,8 @@ function Layout() {
   const location = useLocation();
 
   const hideNavbarRoutes = [
-    "/login",
     "/signup",
+    "/login",
     "/forgot-password",
     "/verify-otp",
     "/verify-email",

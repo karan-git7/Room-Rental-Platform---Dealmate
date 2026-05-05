@@ -64,6 +64,63 @@ export default function Login() {
     }
   };
 
+  const handleGuestLogin = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.post('/auth/guest');
+
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+      navigate('/');
+    } catch (err) {
+      console.error('Guest login error:', err);
+      setError('Guest login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewAdminLogin = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.post('/auth/login', { 
+        email: 'viewadmin@dealmate.com', 
+        password: 'viewadmin123' 
+      });
+
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+      navigate('/admin');
+    } catch (err) {
+      console.error('View admin login error:', err);
+      setError('View admin login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewSellerLogin = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.post('/auth/login', { 
+        email: 'kgusa121@gmail.com', 
+        password: '123123' 
+      });
+
+      if (data?.token) localStorage.setItem('token', data.token);
+      if (data?.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+      navigate('/seller');
+    } catch (err) {
+      console.error('View seller login error:', err);
+      setError('View seller login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       {loading && <Loader overlay text="Signing you in..." />}
@@ -136,6 +193,69 @@ export default function Login() {
           >
             Forgot password?
           </Link>
+        </div>
+
+        <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+          <h4 style={{ textAlign: 'center', marginBottom: '15px', color: '#666', fontSize: '16px' }}>
+            Quick Demo Access
+          </h4>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button
+              className="btn"
+              type="button"
+              onClick={handleGuestLogin}
+              disabled={loading}
+              style={{ 
+                background: '#6c757d',
+                border: 'none',
+                padding: '10px',
+                borderRadius: '5px',
+                color: 'white',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              🏠 Continue as Guest
+            </button>
+            
+            <button
+              className="btn"
+              type="button"
+              onClick={handleViewAdminLogin}
+              disabled={loading}
+              style={{ 
+                background: '#dc3545',
+                border: 'none',
+                padding: '10px',
+                borderRadius: '5px',
+                color: 'white',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              👑 View Admin Dashboard (Demo)
+            </button>
+            
+            <button
+              className="btn"
+              type="button"
+              onClick={handleViewSellerLogin}
+              disabled={loading}
+              style={{ 
+                background: '#28a745',
+                border: 'none',
+                padding: '10px',
+                borderRadius: '5px',
+                color: 'white',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              🛍️ View Seller Dashboard (Demo)
+            </button>
+          </div>
+          
+          <p style={{ fontSize: '12px', color: '#999', textAlign: 'center', marginTop: '10px' }}>
+            Demo accounts have view-only access
+          </p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Category from "../../models/Category.js";
 import { productUpload } from "../../middleware/fileUpload.js";
 import express from "express";
+import { blockViewOnly } from "../../middleware/auth.js";
 
 export const getCategories = async (req, res) => {
   try {
@@ -42,9 +43,9 @@ export const deleteCategory = async (req, res) => {
 
 export const adminCategoryRouter = express.Router();
 adminCategoryRouter.get("/", getCategories);
-adminCategoryRouter.post("/", productUpload.single("image"), createCategory);
-adminCategoryRouter.delete("/:id", deleteCategory);
-adminCategoryRouter.put("/:id", productUpload.single("image"), async (req, res) => {
+adminCategoryRouter.post("/", productUpload.single("image"), blockViewOnly, createCategory);
+adminCategoryRouter.delete("/:id", blockViewOnly, deleteCategory);
+adminCategoryRouter.put("/:id", productUpload.single("image"), blockViewOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
